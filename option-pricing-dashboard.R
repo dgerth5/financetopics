@@ -10,7 +10,7 @@ ui <- fluidPage(
       numericInput("u", label = "Mean return (u):", value = 0.05, min = 0, step = 0.01),
       numericInput("o", label = "Volatility (o):", value = 0.2, min = 0, step = 0.01),
       numericInput("t", label = "Time to maturity (t):", value = 1, min = 0, step = 0.01),
-      numericInput("r", label = "Risk-free rate (r):", value = 0.03, min = 0, step = 0.01),
+      numericInput("r", label = "Risk-free rate (r):", value = 0.05, min = 0, step = 0.01),
       numericInput("steps", label = "Number of steps:", value = 100, min = 1),
       numericInput("sims", label = "Number of simulations:", value = 1000, min = 1),
       actionButton("go", "Calculate")
@@ -32,7 +32,8 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-  
+
+  # simulate geometric brownian motion
   gbm <- function(s0, u, o, t, steps, sims){
     
     paths <- matrix(0, nrow = steps, ncol = sims)
@@ -63,7 +64,8 @@ server <- function(input, output) {
     return(df)
     
   }
-  
+
+  # fixed strike asian option
   asian_option_prices <- function(paths, r, t, K){
     
     c <- numeric(length(K))
@@ -90,8 +92,8 @@ server <- function(input, output) {
     r <- input$r
     steps <- input$steps
     sims <- input$sims
-    
-    K <- seq(round(s0,0) - 5, round(s0,0) + 5, by = 0.5)
+
+    K <- seq(round(s0,0) - 5, round(s0,0) + 5, by = 0.5)  # not sure if I want to have the user set this
     
     paths <- gbm(s0, u, o, t, steps, sims)
     prices_eu <- euro_option_prices(paths, r, t, K)
