@@ -29,7 +29,7 @@ get_yc <- function(year){
 
   vec_list <- list(bc_1month, bc_2month, bc_3month, bc_4month, bc_6month,
                    bc_1year, bc_2year, bc_3year, bc_5year, bc_7year, bc_10year, bc_20year, bc_30year)
-  vec_list <- lapply(vec_list, function(x) if(length(x) == 0) rep(NA, length(dates)) else as.numeric(x))
+  vec_list <- lapply(vec_list, function(x) if(length(x) == 0) rep(NA, length(dates)) else if (length(x) > 0 & length(x) < length(dates)) c(rep(NA, length(dates) - length(x)), as.numeric(x)) else as.numeric(x))
   names(vec_list) <- c("month1", "month2", "month3", "month4", "month6",
                        "year1", "year2", "year3", "year5", "year7", "year10", "year20", "year30")
   yc_df <- data.frame(Date = dates, vec_list)
@@ -37,5 +37,3 @@ get_yc <- function(year){
   return(yc_df)
   }
 }
-
-x <- get_yc(1994) 
