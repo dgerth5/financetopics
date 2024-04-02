@@ -16,7 +16,7 @@ def get_yc(year):
     for entry in entries:
         date = entry.find('d:NEW_DATE').text[:10]  # Extract date, trimming time part if present
         data = {'Date': date}
-        for tag in ['BC_1MONTH', 'BC_3MONTH', 'BC_6MONTH', 'BC_1YEAR', 'BC_2YEAR', 'BC_3YEAR', 'BC_5YEAR', 'BC_7YEAR', 'BC_10YEAR', 'BC_20YEAR', 'BC_30YEAR']:
+        for tag in ['BC_1MONTH', 'BC_2MONTH', 'BC_3MONTH', 'BC_4MONTH', 'BC_6MONTH', 'BC_1YEAR', 'BC_2YEAR', 'BC_3YEAR', 'BC_5YEAR', 'BC_7YEAR', 'BC_10YEAR', 'BC_20YEAR', 'BC_30YEAR']:
             result = entry.find(tag)
             data[tag] = result.text if result else pd.NA
         
