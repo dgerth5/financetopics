@@ -32,7 +32,7 @@ def get_yc(year):
 
     return yc_df
 
-def tsy_yield(start_date, end_date):
+def hist_tsy_yield(start_date, end_date):
 
   # confirm that start_date and end_date are dates
   try: 
