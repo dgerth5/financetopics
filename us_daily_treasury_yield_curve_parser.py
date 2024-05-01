@@ -3,12 +3,10 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from dateutil import parser
 
-
 def get_yc(year):
-    
     if year < 1990:
         print("Choose Year greater than 1990.")
-        return None
+        return pd.DataFrame()
 
     url = f"https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value={year}"
     response = requests.get(url)
@@ -28,49 +26,50 @@ def get_yc(year):
         all_data.append(data)
 
     yc_df = pd.DataFrame(all_data)
-    yc_df.set_index('Date', inplace=True)
+    # yc_df.set_index('Date', inplace=True)  # Comment out or remove this line
 
     return yc_df
 
 def hist_tsy_yield(start_date, end_date):
+    # confirm that start_date and end_date are dates
+    try: 
+        parser.parse(start_date)
+    except ValueError:
+        return "Provide Valid Date"
 
-  # confirm that start_date and end_date are dates
-  try: 
-    parser.parse(start_date)
-    pass
-  except ValueError:
-    return "Provide Valid Date"
+    try:
+        parser.parse(end_date)
+    except ValueError:
+        return "Provide Valid Date"
 
-  try:
-    parser.parse(end_date)
-    pass
-  except ValueError:
-    return "Provide Valid Date"
+    # check that start_date is before end_date
+    if parser.parse(start_date) > parser.parse(end_date):
+        return "Start date needs to be older than end date"
 
-  # check that start_date is before end_date
+    # get years
+    start_year = parser.parse(start_date).year
+    end_year = parser.parse(end_date).year
+    years = list(range(start_year, end_year+1))
 
-  if parser.parse(start_date) > parser.parse(end_date):
-    return "Start date needs to be older than end date"
+    year_df = pd.DataFrame()
 
-  # get years
+    for i in years:
+        df = get_yc(i)
+        if df.empty:
+            continue
+        year_df = pd.concat([year_df, df], ignore_index=True)
 
-  start_year = parser.parse(start_date).year
-  end_year = parser.parse(end_date).year
+    if year_df.empty:
+        return pd.DataFrame()  # Return empty DataFrame if no data was collected
 
-  years = list(range(start_year, end_year+1))
+    # filter data to between selected dates
+    fmt_start_date = parser.parse(start_date).strftime("%Y-%m-%d")
+    fmt_end_date = parser.parse(end_date).strftime("%Y-%m-%d")
 
-  year_df = pd.DataFrame()
+    filter_df = year_df[(year_df['Date'] >= fmt_start_date) & (year_df['Date'] <= fmt_end_date)]
 
-  for i in years:
-      df = get_yc(i)
-      # Append df to empty_dat using pd.concat and assign back to empty_dat
-      year_df = pd.concat([year_df, df], ignore_index=True)
+    return filter_df.reset_index(drop=True)
 
-  # filter data to between selected dates
+# Example usage
+print(hist_tsy_yield("2024-01-01", "2024-04-01").head(20))
 
-  fmt_start_date = parser.parse(start_date).strftime("%Y-%m-%d")
-  fmt_end_date = parser.parse(end_date).strftime("%Y-%m-%d")
-
-  filter_df = year_df[(year_df['Date'] >= fmt_start_date) & (year_df['Date'] <= fmt_end_date)]
-
-  return filter_df.reset_index(drop=True)
